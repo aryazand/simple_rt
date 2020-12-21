@@ -20,11 +20,11 @@ run_simulation <- drake_plan(
   rt_estimates_params_acc = map(epidemic_simulations, function(i) estimates_rt(i,
                                                     mean_gi = attributes(i)$metadata["mean_gi"],
                                                      gamma_val = attributes(i)$metadata["gamma_val"], tau = 7,
-                                                     error.mean = 0, error.sd = 0)),
+                                                     error.mean = 0, error.sd = 0)) %>% bind_rows(., .id = "simulation_run"),
 
   # Estimate Rt from simulation with inaccurate parameters
   rt_estimates_params_inacc = map(epidemic_simulations, function(i) estimates_rt(i,
                                    mean_gi = attributes(i)$metadata["mean_gi"],
                                    gamma_val = attributes(i)$metadata["gamma_val"], tau = 7,
-                                   error.mean = 0, error.sd = 2))
+                                   error.mean = 0, error.sd = 2)) %>% bind_rows(., .id = "simulation_run")
 )
