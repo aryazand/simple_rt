@@ -1,0 +1,105 @@
+---
+title: Template for Oxford University Press papers
+#date: "`r Sys.Date()`"
+authors:
+  - name: Authors
+    email: emails
+    address: institutions
+abstract: |
+  This is the abstract.
+acknowledgements: |
+  This is an acknowledgement.
+keywords:
+  - key
+  - dictionary
+  - word
+#fontsize: 12pt
+#spacing: halfline # could also be oneline
+#classoptions:
+#  - endnotes
+bibliography: references.bib
+output: rticles::oup_article
+#header-includes:
+#  - \usepackage[nomarkers,tablesfirst]{endfloat} # For figures and tables at end
+#  - \usepackage{lineno} # For line numbering
+#  - \linenumbers # For line numbering
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE) # By default, hide code; set to TRUE to see code
+knitr::opts_chunk$set(fig.pos = 'p') # Places figures on pages separate from text
+knitr::opts_chunk$set(out.width = '100%', dpi=300) # Figure resolution and size
+knitr::opts_chunk$set(fig.env="figure") # Latex figure environment
+
+## Load packages
+library("ggplot2")
+library("ggpubr")
+library("drake")
+```
+
+```{r load-data}
+simulation_parameters = readd("simulation_parameters")
+rt_estimates_params_acc = readd("rt_estimates_params_acc")
+rt_estimates_params_inacc = readd("rt_estimates_params_inacc")
+
+error_median = with(rt_estimates_params_acc, median(abs(rt.simple_mean_error), na.rm = T)) %>% signif(digits = 2)
+error_quantile_95 = with(rt_estimates_params_acc, quantile(abs(rt.simple_mean_error), 0.95, na.rm = T)) %>% signif(digits = 2)
+error_quantile_05 = with(rt_estimates_params_acc, quantile(abs(rt.simple_mean_error), 0.05, na.rm = T)) %>% signif(digits = 2)
+
+```
+
+# Introduction
+
+The effective reproduction number ($R_t$) is a fundamental measure in infectious disease epidemiology. It can be defined as the average number of secondary caused by an infected individual. The $R_t$ changes over the course of an epidemic, because it is not only determined by characteristics of the pathogen but also by human behavior (e.g. face mask usage, physical distancing, and travel restrictions). If the $R_t$ is above 1, it indicates that epidemic is growing exponentially. If, by contrast, the $R_t$ drop below 1, it indicates that the number of new cases is decreasing. Furthermore, the $R_t$ can vary between geographic locations, as social behaviors vary between these locations. 
+
+From a public health perspective, the $R_t$ can be a method to communicate whether an epidemic is growing in a region. However, this communication may be hindered by the fact that many of common methods for estimating $R_t$ require advanced mathematics to understand [@cori_new_2013; @wallinga_different_2004; @wallinga_how_2007]. Here, we describe how $R_t$ can be approximated by a ratio of new infections on day $t$ and day $t-d$, where d is the mean generation interval of the infection ("generation interval" is defined as the average time from when a primary case becomes infectious to when a secondary becomes infectious). The major advantage of this approximation is that its simplicity makes it easily understandable and verifiable.
+
+## A Simple Ratio for Estimating Rt
+
+The total number of new infections at time, $I_t$, can be calculated by summing the expected number of new cases created at $t$ by each person infected prior to $t$. The expected of number of new cases created by an infected person can be considered as a function, $n(a)$, of the age ($a$) of their infection [@wallinga_how_2007]. 
+
+$$I_t = \int_a^\infty{I_{t-a}n(a)}da$$
+
+The function $n(a)$ can be normalized to by the total number of infection an infected person is expected cause (i.e. $R$) to produce the generation interval distribution: 
+
+$$g(a) = \frac{n(a)}{R}$$
+
+This can be substituted into equation 1 to produce: 
+
+$$\frac{I_t}{R} = \int_a^\infty{I_{t-a}g(a)}da$$
+$${R} = \frac{I_t}{\int{I_{t-a}g(a)}da}$$
+
+If we make the assumption that there is minimal variance in the generation interval distribution (i.e. $g(a)$ equals approximately 1 when $a$ equals the mean generation interval ($d$) and $g(a)$ equals approximately zero for all other values of $a$), then equation 4 can be simplified to: 
+
+$${R} \approx \frac{I_t}{I_{t-d}}$$
+
+We can make this estimation of $R_t$ robust to variations in the generation interval and reporting of the infection by calculating $R_t$ as the ratio of the sums of new cases within two time windows size $\tau$ days (with the center of the time periods being on days $t$ and $t-d$):
+
+$$ R_t \approx \frac{\sum_{t - \frac{\tau}{2}}^{t + \frac{\tau}{2}}I_i}{\sum_{t - \frac{\tau}{2}}^{t + \frac{\tau}{2}}I_{i-d}} = \frac{n_{t}}{n_{t-d}}$$
+A confidence interval can be generated for this ratio by carrying forward a confidence interval in the generation time. 
+
+# Materials and methods
+
+# Results
+
+## Accuracy of the simple ratio estimation of $R_t$
+
+We assessed how accurately the simple ratio can estimate $R_t$ compared to a previously developed method by Cori et al [@cori_new_2013], which is a popular method in the field - we will refer to this method as the "Cori method". $R_t$ calculation with either the simple ratio and Cori method requires knowing the mean generation interval of the infection; however, the Cori method also requires knowing the standard deviation of the generation interval or having an empiric distribution of the generation interval. 
+
+To assess accuracy of $R_t$ estimations, we used Susceptible-Exposed-Infectious-Resolved (SEIR) model to simulate epidemics and then compare how accurately the two methods can estimate the $R_t$ values in the epidemics. We simulated `r simulation_parameters$Nsims` epidemics in a population of `r addUnits(N)` individuals. We varied the lengths of latent and infectiousness periods with each simulation. In each simulation, the population underwent changes in the $R_t$ value representing changes in population behavior (e.g. "lockdown" period or lifting of a lockdown).  **Figure \@ref(fig:sim-results) A** shows the true $R_t$ and the estimated $R_t$ values for each day in one such simulated epidemic. A full visualization of the all the simulations can be seen in **Figure S1**.  
+
+Over the `r simulation_parameters$Nsims` simulation, the median estimation error of the daily $R_t$ by the simple ratio method was  `r error_median` (90% range of `r error_quantile_05` to `r error_quantile_95`) (**Figure \@ref(fig:sim-results) B**). The simple ratio has a tendency to over-estimate the $R_t$, especially as the true value of $R_t$ increases above 1.5 (**Figure \@ref(fig:sim-results) C**).
+
+Often however, the the mean and standard deviation of the generation interval is not well known. Therefore, we compared the accuracy of the two methods if the standard deviation of the generation interval is mis-specified as three days longer. Under these conditions, the simple ratio actually performs slightly better than than the Cori et al method (**Figure \@ref(fig:sim-results) D-E**). By requiring fewer parameters, the simple ratio is robust to mis-specification of the standard deviation. This is a legitimate concern given that estimates for the standard deviation of the generation interval for the COVID-19 have ranged from 0.95 to 4.75 days [@knight_estimating_2020].  
+
+## Simple ratio estimation of $R_t$ in COVID data
+
+We next compared $R_t$ estimates from the Simple Ratio and Cori et al for using data from the current COVID-19 pandemic. We estimated $R_t$ in four nations using a generation interval with mean of `r mean_gi` and standard deviation of `r sd_gi`[@ganyani_estimating_2020]. **Figure \@ref(fig:real-world-data) A** shows the results for the month of October 2020. The two estimates have very good concordance, with an average difference in estimation of `r round(mean_diff,2)` (**Figure \@ref(fig:real-world-data) B**). 
+
+```{r real-world-data, fig.cap = "\\textbf{The Simple Ratio and Cori Method estimate similar Rt values for the COVID-19 pandemic}"}
+
+```
+
+# Discussion
+
+# References
