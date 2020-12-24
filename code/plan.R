@@ -24,11 +24,18 @@ plan <- drake_plan(
                        gamma_val = attributes(i)$metadata["gamma_val"], tau = 7,
                        error.mean = 0, error.sd = 0)) %>% bind_rows(., .id = "simulation_run"),
 
-  # Estimate Rt from simulation with inaccurate parameters
-  rt_estimates_params_inacc = map(epidemic_simulations, function(i) estimates_rt(i,
-                                   mean_gi = attributes(i)$metadata["mean_gi"],
-                                   gamma_val = attributes(i)$metadata["gamma_val"], tau = 7,
-                                   error.mean = 0, error.sd = 2)) %>% bind_rows(., .id = "simulation_run")
+  # Estimate Rt from simulation with inaccurate mean
+  rt_estimates_meanerr = map(epidemic_simulations, function(i) estimates_rt(i,
+                               mean_gi = attributes(i)$metadata["mean_gi"],
+                               gamma_val = attributes(i)$metadata["gamma_val"], tau = 7,
+                               error.mean = 2, error.sd = 0)) %>% bind_rows(., .id = "simulation_run"),
+
+  # Estimate Rt from simulation with inaccurate sd
+  rt_estimates_sderr = map(epidemic_simulations, function(i) estimates_rt(i,
+                           mean_gi = attributes(i)$metadata["mean_gi"],
+                           gamma_val = attributes(i)$metadata["gamma_val"], tau = 7,
+                           error.mean = 0, error.sd = 2)) %>% bind_rows(., .id = "simulation_run"),
+
   # Real-world data
   COVID19_params = list(mean_gi = 4.83, sd_gi = 1.72),
   national_data_raw = download_covid19_data(),
