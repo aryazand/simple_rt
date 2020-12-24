@@ -1,4 +1,4 @@
-run_simulation <- drake_plan(
+plan <- drake_plan(
   # Load simulation parameters
   simulation_parameters = list(
     mean_gi_range = c(4,12,1),
