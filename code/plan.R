@@ -29,4 +29,15 @@ plan <- drake_plan(
                                    mean_gi = attributes(i)$metadata["mean_gi"],
                                    gamma_val = attributes(i)$metadata["gamma_val"], tau = 7,
                                    error.mean = 0, error.sd = 2)) %>% bind_rows(., .id = "simulation_run")
+  # Real-world data
+  COVID19_params = list(mean_gi = 4.83, sd_gi = 1.72),
+  national_data_raw = download_covid19_data(),
+  national_data = national_data_raw %>%
+    group_by(country) %>% nest() %>%
+    mutate(rt.simple = map(data, function(x) estimates_rt.simple(time = x$time, Is = x$cases_new, mean_gi = round(COVID19_params$mean_gi), tau = 7))) %>%
+    mutate(rt.cori = map(data, function(x) estimates_rt.cori(time = x$time, Is = x$cases_new, mean_gi = COVID19_params$mean_gi, sd_gi = COVID19_params$sd_gi, tau = 7))) %>%
+    mutate(data = map2(data, rt.simple, full_join, by = "time")) %>% select(-rt.simple) %>%
+    mutate(data = map2(data, rt.cori, full_join, by = "time")) %>% select(-rt.cori) %>%
+    unnest(data) %>%
+    mutate(estimation_diff = abs(rt.cori_mean - rt.simple_mean)),
 )
