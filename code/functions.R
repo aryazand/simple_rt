@@ -195,7 +195,7 @@ estimates_rt.simple <- function(time, Is, mean_gi, tau) {
   df = df %>%
     mutate(new_cases_sum = roll_sum(Is,  tau, align="center", fill = c(NA, NA, NA))) %>%
     mutate(new_cases_sum_gi_days_ago = lag(new_cases_sum, mean_gi)) %>%
-    mutate(rt.simple_mean = (new_cases_sum+0.1)/(new_cases_sum_gi_days_ago+0.1))
+    mutate(rt.simple_mean = (new_cases_sum)/(new_cases_sum_gi_days_ago))
 
   # Confidence Interval.using beta representation of Clopper-Pearson method
   # (instead of using poisson.test(), which uses binom.test indirectly)
