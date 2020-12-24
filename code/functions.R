@@ -130,11 +130,12 @@ model_pandemic <- function(initial_state_values, mean_gi, gamma_val, r0, period_
   return(output)
 }
 
-model_stochastic_parameters <- function(initial_state_values, mean_gi_range, r0_range, num_periods, period_lengths_range, transition_lengths_range) {
+model_stochastic_parameters <- function(initial_state_values, mean_gi_range, r0_range, num_periods, period_lengths_range, transition_lengths_range,
+                                        min_simLength, min_newCases) {
 
   i = 0
   sim_data = data.frame()
-  while(nrow(sim_data) < 150 | any(sim_data$new_cases < 20, na.rm = T)) {
+  while(nrow(sim_data) < min_simLength | any(sim_data$new_cases < min_newCases, na.rm = T)) {
     # i = i + 1
     # print(paste("trial...",i))
 
@@ -178,7 +179,9 @@ model_stochastic_parameters_multiwrapper <- function(simulation_parameters) {
                                                r0_range = seq(r0_range[1], r0_range[2], r0_range[3]),
                                                num_periods = num_periods,
                                                period_lengths = seq(period_lengths[1], period_lengths[2], period_lengths[3]),
-                                               transition_lengths =  seq(transition_lengths[1], transition_lengths[2], transition_lengths[3])), simplify = F)
+                                               transition_lengths =  seq(transition_lengths[1], transition_lengths[2], transition_lengths[3]),
+                                               min_simLength = min_simLength,
+                                               min_newCases = min_newCases), simplify = F)
     )
 }
 
