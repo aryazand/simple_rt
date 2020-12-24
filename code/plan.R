@@ -10,7 +10,9 @@ plan <- drake_plan(
     initial_state_values = c(S = 2e7-100,
                               E = 0,
                               I = 1000,
-                              R = 0)
+                              R = 0),
+    min_simLength = 150,
+    min_newCases = 20
   ),
 
   # Run Epidemic Simulations
