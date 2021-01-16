@@ -149,7 +149,7 @@ Then to determine the total expected number of new infections today ($I_t$), we 
   (\#eq:renewal-eq)
 \end{equation}
 ```
-The generation interval distribution is equal to $n(a)$ normalized by the total number of infections a single infected person is expected cause (i.e. $R_t$).
+Next we can substitute the generation interval function ($g(a)$) into Equation \@ref(eq:renewal-eq) by recognizing that the generation interval distribution is equal to $n(a)$ normalized by the total number of infections a single infected person is expected cause (i.e. $R_t$).
 
 ```{=tex}
 \begin{equation} 
@@ -157,11 +157,9 @@ The generation interval distribution is equal to $n(a)$ normalized by the total 
   (\#eq:generation-interval-eq)
 \end{equation}
 ```
-Thus, Equation \@ref(eq:generation-interval-eq) can be substituted into Equation \@ref(eq:renewal-eq) to produce:
-
 ```{=tex}
 \begin{equation} 
-  \frac{I_t} = \int_a^\infty{I_{t-a}\frac{g(a)}{R_t}}da
+  I_t = \int_a^\infty{I_{t-a}\frac{g(a)}{R_t}}da
   (\#eq:sub-in-rt-1)
 \end{equation}
 ```
@@ -177,7 +175,7 @@ Thus, Equation \@ref(eq:generation-interval-eq) can be substituted into Equation
   (\#eq:sub-in-rt-3)
 \end{equation}
 ```
-If we make the assumption that there is minimal variance in the generation interval distribution (i.e. $g(a)$ equals approximately 1 when $a$ equals the mean generation interval ($d$) and $g(a)$ equals approximately zero for all other values of $a$), then equation (4) can be simplified to:
+If we make the assumption that there is minimal variance in the generation interval distribution (i.e. $g(a)$ equals approximately 1 when $a$ equals the mean generation interval ($d$) and $g(a)$ equals approximately zero for all other values of $a$), then Equation \@ref(eq:renewal-eq) can be simplified to:
 
 ```{=tex}
 \begin{equation}
