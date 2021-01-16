@@ -130,7 +130,7 @@ The effective reproduction number ($R_t$) is a fundamental measure in infectious
 
 From a public health perspective, the $R_t$ can be a method to communicate whether an epidemic is growing in a region. However, this communication may be hindered by the fact that many of the current methods for estimating $R_t$ require advanced mathematics to understand and to apply [@cori_new_2013; @wallinga_different_2004; @wallinga_how_2007]. Typically these methods require a description of the generation interval distribution, which is the distribution of times between when a primary case becomes infectious to when a secondary case becomes infectious.
 
-Here, we describe how $R_t$ can be approximated by a simple ratio of new infections on day $t$ and day $t-d$, where $d$ is the mean generation interval of the infection (\cref{eq:simple-ratio-eq}). Our aim is two-fold: First, by describing a simplified method of calculating $R_t$, it may allow others to easily and rapidly calculate $R_t$. Second, to assess the accuracy of the simple ratio compared to the more advanced methods for calculating $R_t$. This second aim is important, because this simplified ratio has been used to calculate $R_t$ in public health reports but we have not found significant literature describing the performance of the method (at least in English publications).
+Here, we describe how $R_t$ can be approximated by a simple ratio of new infections on day $t$ and day $t-d$, where $d$ is the mean generation interval of the infection (\cref{eq:simple-ratio-eq}). Our aim is two-fold: First, by describing a simplified method of calculating $R_t$, it may allow others to easily and rapidly calculate $R_t$. Second, to assess the accuracy of the simple ratio compared to the more advanced methods for calculating $R_t$. This second aim is important, because this simplified ratio has been used to calculate $R_t$ in public health reports, such as the reports created by Germany's Robert Koch Institute [@Heiden2020Schatzung], but we have not found significant literature describing the performance of the method (at least in English literature).
 
 ```{=tex}
 \begin{equation}
@@ -138,8 +138,6 @@ Here, we describe how $R_t$ can be approximated by a simple ratio of new infecti
   (\#eq:simple-ratio-eq)
 \end{equation}
 ```
-The major advantage of this approximation is that its simplicity makes it easily understandable and verifiable. Anybody with basic math skills and access to the new case counts can calculate this ratio to estimate the $R_t$.
-
 ## A Simple Ratio for Estimating Rt {.unnumbered}
 
 As described by previous publications [@wallinga_how_2007], we can define a function $n(a)$ that describes the expected number of new cases produced today (time $t$) by a single person who was infected $a$ days ago (at time $t-a$). Therefore, to calculate $I_{ta}$ (the expected number of new infections created today by all individuals who became infected $a$ days ago), we multiply $n(a)$ by the number of new infections created $a$ days ago ($I_{t-a}$).
