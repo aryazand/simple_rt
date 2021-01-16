@@ -96,8 +96,6 @@ rt_estimates = readd("rt_estimates")
 national_data = readd("national_data")
 COVID19_params = readd("COVID19_params")
 
-
-
 # Comparison with COVID-19 data
 national_data_filtered = national_data %>% 
   filter(time > as.Date("2020-04-01") & time < as.Date("2020-12-01")) %>% 
@@ -214,6 +212,14 @@ All simulations, data processing, analysis, and graphics were all created using 
 # Results {.unnumbered}
 
 ## Accuracy of the simple ratio estimation of $R_t$ {.unnumbered}
+
+```{r}
+# Descriptive Statistics
+N = simulation_parameters$initial_state_values %>% sum()
+error_median = with(rt_estimates, median(abs(rt.simple_mean_error), na.rm = T)) %>% signif(digits = 2)
+error_quantile_975 = with(rt_estimates, quantile(abs(rt.simple_mean_error), 0.975, na.rm = T)) %>% signif(digits = 2) %>% format(scientific = F)
+error_quantile_025 = with(rt_estimates, quantile(abs(rt.simple_mean_error), 0.025, na.rm = T)) %>% signif(digits = 2) %>% format(scientific = F)
+```
 
 We assessed how accurately the simple ratio can estimate $R_t$ compared to a previously developed method by Cori et al [-@cori_new_2013], which is a popular method in the field - we will refer to this method as the "Cori method". $R_t$ calculation with either the simple ratio and Cori method requires knowing the mean generation interval of the infection; however, the Cori method also requires knowing the standard deviation of the generation interval or having an empiric distribution of the generation interval.
 
