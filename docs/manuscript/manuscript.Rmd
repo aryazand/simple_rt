@@ -230,19 +230,6 @@ Over the `r simulation_parameters$Nsims` simulation, the median estimation error
 (ref:sim-results-cap) \textbf{The Simple Ratio approximates the effective reproduction in simualted epidemics.} One hundred epidemics were simulated using an SEIR model and the simple ratio and Cori method were used to estimate the known $R_t$ over time for each simulated epidemic. \textbf{(A)} The true $R_t$ (black line) and estimated $R_t$ (colored lines) over time for one of simulated epidemics. \textbf{(B)} The distribution of the absolute errors of both estimation methods across all simulated epidemics. \textbf{(C)} The estimation error of the simple ratio method is associated with size of true $R_t$
 
 ```{r sim-results, fig.cap = '(ref:sim-results-cap)'}
-
-# Descriptive Statistics
-N = simulation_parameters$initial_state_values %>% sum()
-error_median = with(rt_estimates, median(abs(rt.simple_mean_error), na.rm = T)) %>% signif(digits = 2)
-error_quantile_975 = with(rt_estimates, quantile(abs(rt.simple_mean_error), 0.975, na.rm = T)) %>% signif(digits = 2) %>% format(scientific = F)
-error_quantile_025 = with(rt_estimates, quantile(abs(rt.simple_mean_error), 0.025, na.rm = T)) %>% signif(digits = 2) %>% format(scientific = F)
-
-# 
-rt_estimates_error_summary <- rt_estimates %>%
-  filter(time > 14) %>%
-  group_by(simulation_run) %>%
-  summarise(dm_test = list(dm.test(rt.simple_mean_error, rt.cori_mean_error)))
-
 # Plots
 panel_A <- rt_estimates %>%
   filter(simulation_run == 66) %>%
