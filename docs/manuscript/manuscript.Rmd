@@ -242,26 +242,31 @@ panel_A <- rt_estimates %>%
   filter(simulation_run == 66) %>%
   create_estimate_plot()
 
-panel_C <- rt_estimates %>%
+panel_B <- rt_estimates %>%
   filter(time > 14) %>%
   create_rt_estimation_error_boxplot()
 
-panel_D <- rt_estimates %>%
+panel_C <- rt_estimates %>%
   filter(time > 14) %>%
   create_rt_estimation_error_by_rt()
 
 panel_D <- rt_estimates %>% 
   pivot_longer(cols = ends_with("mean_error"), names_to = "Method", values_to = "estimation_error") %>% 
   mutate(Method = recode(Method, rt.cori_mean_error = "cori", rt.simple_mean_error = "simple")) %>%
-  ggplot(aes(x = time, y = estimation_error)) + geom_line(aes(group = simulation_run, color = Method), alpha = 0.2) + 
-  facet_wrap(~Method, ncol = 1) +
-  custom_theme() + theme(strip.background = element_blank(), strip.text = element_blank()) + 
+  ggplot(aes(x = time, y = estimation_error)) + geom_line(aes(group = interaction(simulation_run, Method), color = Method), alpha = 0.2) + 
+  facet_wrap(~Method, ncol = 2) +
+  ylab("Estimation Error") + 
+  custom_theme() + 
+  theme(strip.background = element_blank(), 
+        strip.text = element_blank(),
+        legend.position = "none") + 
   scale_color_manual(values=cbPalette) +
-  scale_fill_manual(values=cbPalette)
+  scale_fill_manual(values=cbPalette) + 
+  ylim(-0.25, 0.5)
 
-full_figure_top = ggarrange(panel_A, panel_B, panel_C, ncol=1, nrow = 3, align = "hv", labels=c("A", "B", "C"), common.legend = T)
-full_figure_bottom = ggarrange(panel_D, labels=c("D"), common.legend = T)
-ggarrange(full_figure_top, full_figure_bottom, ncol = 2, common.legend = T)
+full_figure_top = ggarrange(panel_A, panel_B, panel_C, ncol = 3, align = "hv", labels=c("A", "B", "C"), common.legend = T)
+full_figure_bottom = ggarrange(panel_D, labels=c("D"))
+ggarrange(full_figure_top, full_figure_bottom, nrow = 2, common.legend = T)
 
 ```
 
