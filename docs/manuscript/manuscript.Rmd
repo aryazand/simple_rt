@@ -128,7 +128,9 @@ package_citation_ids =  read.bib(here("./docs/manuscript", "packages.bib")) %>%
 
 The effective reproduction number ($R_t$) is a fundamental measure in infectious disease epidemiology. It can be defined as the average number of secondary cases caused by an infected individual. The $R_t$ changes over the course of an epidemic, because it is not only determined by characteristics of the pathogen but also by human behavior (e.g. face mask usage, physical distancing, and travel restrictions). If the $R_t$ is above 1, it indicates that the epidemic is growing exponentially. If, by contrast, the $R_t$ drop below 1, it indicates that the number of new cases is decreasing. Furthermore, the $R_t$ can vary between geographic locations, as social behaviors and environmental factors vary between these locations.
 
-From a public health perspective, the $R_t$ can be a method to communicate whether an epidemic is growing in a region. However, this communication may be hindered by the fact that many of the current methods for estimating $R_t$ require advanced mathematics to understand and to apply [@cori_new_2013; @wallinga_different_2004; @wallinga_how_2007]. Here, we describe how $R_t$ can be approximated by a ratio of new infections on day $t$ and day $t-d$, where $d$ is the mean generation interval of the infection (Equation 1). The average *generation interval* is defined as the average time from when a primary case becomes infectious to when a secondary case becomes infectious.
+From a public health perspective, the $R_t$ can be a method to communicate whether an epidemic is growing in a region. However, this communication may be hindered by the fact that many of the current methods for estimating $R_t$ require advanced mathematics to understand and to apply [@cori_new_2013; @wallinga_different_2004; @wallinga_how_2007]. Typically these methods require a description of the generation interval distribution, which is the distribution of times between when a primary case becomes infectious to when a secondary case becomes infectious.
+
+Here, we describe how $R_t$ can be approximated by a simple ratio of new infections on day $t$ and day $t-d$, where $d$ is the mean generation interval of the infection (\cref{eq:simple-ratio-eq}). Our aim is two-fold: First, by describing a simplified method of calculating $R_t$, it may allow others to easily and rapidly calculate $R_t$. Second, to assess the accuracy of the simple ratio compared to the more advanced methods for calculating $R_t$. This second aim is important, because this simplified ratio has been used to calculate $R_t$ in public health reports but we have not found significant literature describing the performance of the method (at least in English publications).
 
 ```{=tex}
 \begin{equation}
@@ -140,7 +142,7 @@ The major advantage of this approximation is that its simplicity makes it easily
 
 ## A Simple Ratio for Estimating Rt {.unnumbered}
 
-As described by previous publications [@wallinga_how_2007], we can define a function $n(a)$ that describes the expected number of new infections created today (time $t$) by a single person who was infected $a$ days ago (at time $t-a$). Therefore, to calculate $I_{ta}$ (the expected number of new infections created today by all individuals who became infected $a$ days ago), we multiply $n(a)$ by the number of new infections created $a$ days ago ($I_{t-a}$).
+As described by previous publications [@wallinga_how_2007], we can define a function $n(a)$ that describes the expected number of new cases produced today (time $t$) by a single person who was infected $a$ days ago (at time $t-a$). Therefore, to calculate $I_{ta}$ (the expected number of new infections created today by all individuals who became infected $a$ days ago), we multiply $n(a)$ by the number of new infections created $a$ days ago ($I_{t-a}$).
 
 ```{=tex}
 \begin{equation}
@@ -148,22 +150,20 @@ As described by previous publications [@wallinga_how_2007], we can define a func
   (\#eq:eq2)
 \end{equation}
 ```
-
-Then to determine the total expected number of new infections today ($I_t$), we sum $I_{ta}$ for all values of $a$. In other words, $I_t$ can be calculated by taking all individuals infected prior to $t$, calculating the expected number of new infections each one will produce based on the age of their infection, and summing all those values together. If we treat $a$ as continuous variables instead of discrete days, we can integrate over all values of $a$, as shown in \cref{eq:renewal-eq-1}.
+Then to determine the total expected number of new infections today ($I_t$), we sum $I_{ta}$ for all values of $a$, as shown in \cref{eq:renewal-eq-1,eq:renewal-eq-2}. In other words, $I_t$ can be calculated by taking all individuals infected prior to $t$, calculating the expected number of new infections each one will produce based on the age of their infection, and summing all those values together.
 
 ```{=tex}
 \begin{equation} 
-  I_t = \int_a^\infty{I_{ta}}da
+  I_t = \sum_{a=0}^\infty{I_{ta}}da
   (\#eq:renewal-eq-1)
 \end{equation}
 ```
 ```{=tex}
 \begin{equation} 
-  I_t = \int_a^\infty{I_{t-a}n(a)}da
+  I_t = \sum_{a=0}^\infty{I_{t-a}n(a)}da
   (\#eq:renewal-eq-2)
 \end{equation}
 ```
-
 Next we can substitute the generation interval function ($g(a)$) into \cref{eq:renewal-eq-2} by recognizing that the generation interval distribution is equal to $n(a)$ normalized by the total number of infections a single infected person is expected cause (i.e. $R_t$).
 
 ```{=tex}
@@ -174,19 +174,19 @@ Next we can substitute the generation interval function ($g(a)$) into \cref{eq:r
 ```
 ```{=tex}
 \begin{equation} 
-  I_t = \int_a^\infty{I_{t-a}g(a)R_t}da
+  I_t = \sum_{a=0}^\infty{I_{t-a}g(a)R_t}da
   (\#eq:sub-in-rt-1)
 \end{equation}
 ```
 ```{=tex}
 \begin{equation} 
-  \frac{I_t}{R_t} = \int_a^\infty{I_{t-a}g(a)}da
+  \frac{I_t}{R_t} = \sum_{a=0}^\infty{I_{t-a}g(a)}da
   (\#eq:sub-in-rt-2)
 \end{equation}
 ```
 ```{=tex}
 \begin{equation} 
-  R_t = \frac{I_t}{\int{I_{t-a}g(a)}da}
+  R_t = \frac{I_t}{\sum{I_{t-a}g(a)}da}
   (\#eq:sub-in-rt-3)
 \end{equation}
 ```
@@ -212,7 +212,7 @@ A confidence interval can be generated for this ratio by carrying forward a conf
 
 ## Simulation {.unnumbered}
 
-A deterministic Susceptible-Exposed-Infectious-Resolved (SEIR) model was used to create epidemic simulations. No birth rate, death rate, or R to S transition rates were included. We included `r simulation_parameters$Nsims` simulated epidemics in our analysis. For each epidemic, the mean generation interval of the infection was randomly selected from `r simulation_parameters$mean_gi_range[1]` to `r simulation_parameters$mean_gi_range[2]` days. The generation interval was randomly divided into latent and infectious periods. Each simulation was divided in to `r as.english(simulation_parameters$num_periods[1])` `r simulation_parameters$period_lengths[1]` day periods with differing $R_0$ values (representing changes in social behaviors in the populations); and the $R_0$ in these periods was randomly selected from `r simulation_parameters$r0_range[1]` to `r simulation_parameters$r0_range[2]`. Between each `r simulation_parameters$period_lengths[1]` day period, a transition period was included in which the $R_0$ would gradually change following a logistic curve. The length of the transition period was randomly selected from `r simulation_parameters$transition_lengths[1]` to `r simulation_parameters$transition_lengths[2]` days. Only simulations that lasted at least `r simulation_parameters$min_simLength` and never had less than `r simulation_parameters$min_newCases` cases per day were included in final analysis.
+A deterministic Susceptible-Exposed-Infectious-Resolved (SEIR) model was used to create epidemic simulations. No birth rate, death rate, or R to S transition rates were included. We included `r simulation_parameters$Nsims` simulated epidemics in our analysis. For each epidemic, the mean generation interval of the infection was randomly selected from `r simulation_parameters$mean_gi_range[1]` to `r simulation_parameters$mean_gi_range[2]` days. The generation interval was randomly divided into latent and infectious periods. Each simulation was divided in to `r as.english(simulation_parameters$num_periods[1])` `r simulation_parameters$period_lengths[1]` day periods with differing $R_0$ values (representing changes in social behaviors in the populations); and the $R_0$ in these periods was randomly selected from `r simulation_parameters$r0_range[1]` to `r simulation_parameters$r0_range[2]`. Between each `r simulation_parameters$period_lengths[1]` day period, a transition period was included in which the $R_0$ would gradually change following a logistic curve. The length of the transition period was randomly selected from `r simulation_parameters$transition_lengths[1]` to `r simulation_parameters$transition_lengths[2]` days. Only simulations that lasted at least `r simulation_parameters$min_simLength` days and never had less than `r simulation_parameters$min_newCases` cases per day were included in final analysis.
 
 ## Rt Estimation {.unnumbered}
 
