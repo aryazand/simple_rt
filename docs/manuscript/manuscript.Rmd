@@ -22,13 +22,22 @@ output:
     keep_tex: yes
     includes:
       in_header: header.tex
+header-includes:
+  - \usepackage[labelsep=period,labelfont=bf]{caption}
+  - \usepackage{hyperref}
+  - \usepackage[capitalize, nameinlink]{cleveref}
+  - \crefdefaultlabelformat{#2\textbf{#1}#3} % <-- Only #1 in \textbf
+  - \crefname{figure}{\textbf{Figure}}{\textbf{Figures}}
+  - \Crefname{figure}{\textbf{Figure}}{\textbf{Figures}}
+  - \crefname{table}{\textbf{Table}}{\textbf{Tables}}
+  - \Crefname{table}{\textbf{Table}}{\textbf{Tables}}
 bibliography:
-- packages.bib
-- references.bib
+  - packages.bib
+  - references.bib
 keywords:
-- key
-- dictionary
-- word
+  - key
+  - dictionary
+  - word
 ---
 
 ```{r setup, include=FALSE}
@@ -223,9 +232,9 @@ error_quantile_025 = with(rt_estimates, quantile(abs(rt.simple_mean_error), 0.02
 
 We assessed how accurately the simple ratio can estimate $R_t$ compared to a previously developed method by Cori et al [-@cori_new_2013], which is a popular method in the field - we will refer to this method as the "Cori method". $R_t$ calculation with either the simple ratio and Cori method requires knowing the mean generation interval of the infection; however, the Cori method also requires knowing the standard deviation of the generation interval or having an empiric distribution of the generation interval.
 
-To assess accuracy of $R_t$ estimations, we used Susceptible-Exposed-Infectious-Resolved (SEIR) model to simulate epidemics and then compare how accurately the two methods can estimate the $R_t$ values in the epidemics. We simulated `r simulation_parameters$Nsims` epidemics in a population of `r addUnits(N)` individuals. We varied the lengths of latent and infectiousness periods with each simulation. In each simulation, the population underwent changes in the $R_t$ value representing changes in population behavior (e.g. "lockdown" period or lifting of a lockdown). **Figure** \@ref(fig:sim-results) **A** shows the true $R_t$ and the estimated $R_t$ values for each day in one such simulated epidemic. A full visualization of the all the simulations can be seen in (**Figure** \@ref(fig:all-simulations)).
+To assess accuracy of $R_t$ estimations, we used Susceptible-Exposed-Infectious-Resolved (SEIR) model to simulate epidemics and then compare how accurately the two methods can estimate the $R_t$ values in the epidemics. We simulated `r simulation_parameters$Nsims` epidemics in a population of `r addUnits(N)` individuals. We varied the lengths of latent and infectiousness periods with each simulation. In each simulation, the population underwent changes in the $R_t$ value representing changes in population behavior (e.g. "lockdown" period or lifting of a lockdown). \cref{fig:sim-results}**A** shows the true $R_t$ and the estimated $R_t$ values for each day in one such simulated epidemic. A full visualization of the all the simulations can be seen in (\cref{fig:all-simulations)).
 
-Over the `r simulation_parameters$Nsims` simulation, the median estimation error of the daily $R_t$ by the simple ratio method was `r error_median` (90% range of `r error_quantile_025` to `r error_quantile_975`) (**Figure** \@ref(fig:sim-results) **B**). The simple ratio has a tendency to over-estimate the $R_t$, especially as the true value of $R_t$ increases above 1.5 (**Figure** \@ref(fig:sim-results) **C**). This is consistent with previous mathematical analysis of this simplified method of estimating $R_t$ [@wallinga_how_2007].
+Over the `r simulation_parameters$Nsims` simulation, the median estimation error of the daily $R_t$ by the simple ratio method was `r error_median` (90% range of `r error_quantile_025` to `r error_quantile_975`) (\cref{fig:sim-results)**B**). The simple ratio has a tendency to over-estimate the $R_t$, especially as the true value of $R_t$ increases above 1.5 (\cref{fig:sim-results)**C**). This is consistent with previous mathematical analysis of this simplified method of estimating $R_t$ [@wallinga_how_2007].
 
 (ref:sim-results-cap) \textbf{The Simple Ratio approximates the effective reproduction in simualted epidemics.} One hundred epidemics were simulated using an SEIR model and the simple ratio and Cori method were used to estimate the known $R_t$ over time for each simulated epidemic. \textbf{(A)} The true $R_t$ (black line) and estimated $R_t$ (colored lines) over time for one of simulated epidemics. \textbf{(B)} The distribution of the absolute errors of both estimation methods across all simulated epidemics. \textbf{(C)} The estimation error of the simple ratio method is associated with size of true $R_t$
 
@@ -263,7 +272,7 @@ ggarrange(full_figure_top, full_figure_bottom, nrow = 2, common.legend = T)
 
 ```
 
-Often however, the the mean and standard deviation of the generation interval is typically not known exactly. For instance, for the COVID-19 the mean generation interval estimates, with 95% credible intervals, include 3.95 (3.01 - 4.91) and 5.20 (3.78 - 6.78); and estimates of the standard deviation of the generation interval include 1.51 (0.74 - 2.97) and 1.72 (0.91 - 3.93) [@ganyani_estimating_2020]. Therefore, we compared the accuracy of the two methods if the standard deviation of the generation interval is mis-specified as three days longer. Under these conditions, the simple ratio actually performs slightly better than than the Cori method (**Figure** \@ref(fig:estimation-inaccParams)).
+Often however, the the mean and standard deviation of the generation interval is typically not known exactly. For instance, for the COVID-19 the mean generation interval estimates, with 95% credible intervals, include 3.95 (3.01 - 4.91) and 5.20 (3.78 - 6.78); and estimates of the standard deviation of the generation interval include 1.51 (0.74 - 2.97) and 1.72 (0.91 - 3.93) [@ganyani_estimating_2020]. Therefore, we compared the accuracy of the two methods if the standard deviation of the generation interval is mis-specified as three days longer. Under these conditions, the simple ratio actually performs slightly better than than the Cori method (\cref{fig:estimation-inaccParams)).
 
 ```{r real-world-data, fig.cap = "\\textbf{The Simple Ratio and Cori Method estimate similar Rt values for the COVID-19 pandemic}. \\textbf{(A)} Rt esimations for four sample nations \\textbf{(B)} Histogram displaying the absolute difference in Rt esimation across for each day of the pandemic (Apr 01 to Dec 12) for all 233 individual nations."}
 
@@ -297,7 +306,7 @@ ggarrange(panel_A, ggarrange(panel_B, ncol=2), nrow = 2, heights = c(2,1), label
 
 ## Using the Simple Ratio to Estimate $R_t$ with real-world COVID-19 data {.unnumbered}
 
-We next compared $R_t$ estimates from the Simple Ratio and Cori et al for using data from the current COVID-19 pandemic. We estimated $R_t$ in four nations using a generation interval with mean of `r COVID19_params$mean_gi` and standard deviation of `r COVID19_params$sd_gi`[@ganyani_estimating_2020]. **Figure** \@ref(fig:real-world-data) **A** shows the results for the month of October 2020. Visual inspection shows that the two methods of estimating $R_t$ have very good concordance. Across all nations over the course of the pandemic, the median difference in estimation between the two methods was `r estimation_diff_median` (95% range of `r estimation_diff_quantile_025` to `r estimation_diff_quantile_975`) (**Figure** \@ref(fig:real-world-data) **B**).
+We next compared $R_t$ estimates from the Simple Ratio and Cori et al for using data from the current COVID-19 pandemic. We estimated $R_t$ in four nations using a generation interval with mean of `r COVID19_params$mean_gi` and standard deviation of `r COVID19_params$sd_gi`[@ganyani_estimating_2020]. \cref{fig:real-world-data)**A** shows the results for the month of October 2020. Visual inspection shows that the two methods of estimating $R_t$ have very good concordance. Across all nations over the course of the pandemic, the median difference in estimation between the two methods was `r estimation_diff_median` (95% range of `r estimation_diff_quantile_025` to `r estimation_diff_quantile_975`) (\cref{fig:real-world-data)**B**).
 
 # Discussion {.unnumbered}
 
