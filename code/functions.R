@@ -124,7 +124,7 @@ model_pandemic <- function(initial_state_values, mean_gi, gamma_val, r0, period_
     mutate(new_cases = c(NA, diff(total_infected)))
 
 
-  output = as.tibble(output)
+  output = as_tibble(output)
   attr(output, "metadata") = c(mean_gi = mean_gi, gamma_val = gamma_val)
 
   return(output)
