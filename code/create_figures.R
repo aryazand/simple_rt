@@ -25,13 +25,13 @@ create_rt_estimation_error_boxplot <- function(data) {
     pivot_longer(., cols = starts_with("rt."), names_to = c("Method", "parameter"),
                  names_pattern = "rt.([[:alpha:]]+)_([[:print:]]+)", values_to = "value") %>%
     pivot_wider(names_from = "parameter", values_from = "value") %>%
-    mutate(error = abs(mean_error)) %>%
+    mutate(error = log10(abs(mean_error))) %>%
     ggplot(., aes(Method, error)) +
     geom_violin(aes(fill = Method)) +
     geom_boxplot(width = 0.1, outlier.alpha = 0.5) +
-    ylab("log10(Estimation Error)") +
+    ylab("Absolute Estimation Error (log10)") +
     custom_theme() +
-    scale_y_log10(labels = scales::label_number(accuracy = 0.00001)) +
+    #scale_y_log10(labels = scales::label_number(accuracy = 0.00001)) +
     scale_color_manual(values=cbPalette) +
     scale_fill_manual(values=cbPalette)
 }
