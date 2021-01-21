@@ -34,7 +34,7 @@ plan <- drake_plan(
   rt_estimates_sderr = map(epidemic_simulations, function(i) estimates_rt(i,
                            mean_gi = attributes(i)$metadata["mean_gi"],
                            gamma_val = attributes(i)$metadata["gamma_val"], tau = 7,
-                           error.mean = 0, error.sd = 2)) %>% bind_rows(., .id = "simulation_run"),
+                           error.mean = 0, error.sd = 3)) %>% bind_rows(., .id = "simulation_run"),
 
   # Real-world data
   COVID19_params = list(mean_gi = 4.83, sd_gi = 1.72),
