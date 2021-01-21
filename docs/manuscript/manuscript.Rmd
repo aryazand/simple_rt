@@ -6,17 +6,15 @@ authors:
   address: institutions
 abstract: |
   ABSTRACT
-acknowledgements: |
-  Acknowledgements
 output:
-  bookdown::pdf_book:
-    base_format: rticles::oup_article
+  bookdown::word_document2:
     number_sections: no
     extra_dependencies: float
     keep_tex: yes
     includes:
       in_header: header.tex
-  bookdown::word_document2:
+  bookdown::pdf_book:
+    base_format: rticles::oup_article
     number_sections: no
     extra_dependencies: float
     keep_tex: yes
@@ -126,11 +124,13 @@ package_citation_ids =  read.bib(here("./docs/manuscript", "packages.bib")) %>%
 
 # Introduction {.unnumbered}
 
-The effective reproduction number ($R_t$) is a fundamental measure in infectious disease epidemiology. It can be defined as the average number of secondary cases caused by an infected individual. The $R_t$ changes over the course of an epidemic, because it is not only determined by characteristics of the pathogen but also by human behavior (e.g. face mask usage, physical distancing, and travel restrictions). If the $R_t$ is above 1, it indicates that the epidemic is growing exponentially. If, by contrast, the $R_t$ drop below 1, it indicates that the number of new cases is decreasing. Furthermore, the $R_t$ can vary between geographic locations, as social behaviors and environmental factors vary between these locations.
+The effective reproduction number ($R_t$) is a fundamental measure in infectious disease epidemiology. It can be defined as the average number of secondary cases caused by an infected individual. The $R_t$ changes over the course of an epidemic, because it is not only determined by characteristics of the pathogen but also by human behavior (e.g. face mask usage, physical distancing, and travel restrictions). While the $R_t$ is a retrospective measure and does not predict future behavior of an epidemic, observing the $R_t$ consistently above 1, indicates that the epidemic is growing exponentially. If, by contrast, the $R_t$ is consistently below 1, it indicates that epidemic is shrinking. Furthermore, the $R_t$ can vary between geographic locations, as social behaviors and environmental factors vary between these locations.
 
-From a public health perspective, the $R_t$ can be a method to communicate whether an epidemic is growing in a region. However, this communication may be hindered by the fact that many of the current methods for estimating $R_t$ require advanced mathematics to understand and to apply [@cori_new_2013; @wallinga_different_2004; @wallinga_how_2007]. Typically these methods require a description of the generation interval distribution, which is the distribution of times between when a primary case becomes infected to when a secondary case becomes infected.
+As the COVID-19 pandemic has demonstrated, communication to the public and political leadership regarding infection rates is critical to management of the pandemic. The $R_t$ can be used to communicate whether an epidemic is growing or shrinking in a region. However, this communication may be hindered by the fact that many of the current methods for estimating $R_t$ require advanced mathematics to understand and to apply [@cori_new_2013; @wallinga_different_2004; @wallinga_how_2007].
 
-Here, we describe how $R_t$ can be approximated by a simple ratio of new infections on day $t$ and day $t-d$, where $d$ is the mean generation interval of the infection (\cref{eq:simple-ratio-eq}). Our aim is two-fold: First, by describing a simplified method of calculating $R_t$, it may allow others to easily and rapidly calculate $R_t$. Second, to assess the accuracy of the simple ratio compared to the more advanced methods for calculating $R_t$. This second aim is important, because this simplified ratio has been used to calculate $R_t$ in public health reports, such as the reports created by Germany's Robert Koch Institute [@Heiden2020Schatzung], but we have not found significant literature describing the performance of the method (at least in English literature).
+Here, we describe how $R_t$ can be approximated by a simple ratio of new infections on day $t$ and day $t-d$, where $d$ is the mean generation interval of the infection (\cref{eq:simple-ratio-eq}). The *generational interval* being the time between when a primary case infected to the when they infect a secondary case.
+
+Our aim is two-fold: First, by describing a simplified method of calculating $R_t$, we aim to allow others to easily and rapidly calculate $R_t$. Second, we aim to assess the accuracy of the simple ratio compared to the more advanced methods for estimating the $R_t$. This second aim is important, because this simplified ratio has been used by public health bodies to report the $R_t$ during the COVID-19 pandemic - e.g. reports created by Germany's Robert Koch Institute [@Heiden2020Schatzung] - but we have not found significant literature describing the performance of the method (at least in published English literature).
 
 ```{=tex}
 \begin{equation}
@@ -140,7 +140,7 @@ Here, we describe how $R_t$ can be approximated by a simple ratio of new infecti
 ```
 ## Deriving the Simple Ratio for estimating $R_t$ {.unnumbered}
 
-A subset of previous methods for estimating $R_t$ are based on the following relationship:
+Among the previously developed methods estimating $R_t$, it common to base the estimation on the following relationship:
 
 ```{=tex}
 \begin{equation} 
@@ -148,7 +148,7 @@ A subset of previous methods for estimating $R_t$ are based on the following rel
   (\#eq:original-rt)
 \end{equation}
 ```
-$I_t$ is the number of new cases produced on day $t$; $g(a)$ is the infectiousness of a person infected $a$ days ago - $g(a)$ can be thought of as equivalent to to the generation interval distribution. To understand the derivation of this equation, we refer readers to [@wallinga_how_2007].
+$I_t$ is the number of new cases produced on day $t$; $g(a)$ is the probability density function describing the probability that a person infected $a$ days ago will cause a new case today (at time $t$) - $g(a)$ can be thought of as equivalent to to the generation interval distribution. Intuitively, this equations can be understood in the following way. Consider a scenario where for every day prior to today, only one person was infected. In such a scenario, the denominator of \cref{eq:original-rt} would equal 1 (since it would be the sum of all values of probability density function) and the $R_t$ would equal $I_t$. In this framework $R_t$ is equal to the number of new infections created today by a cohort of people that span the entire lifetime of an infection, which is mathematically equivalent to the traditional framework of $R_t$ as the total number of new cases generated by one infected person across the entire lifetime of that person's infection. Now consider the scenario where multiple people were infected each day prior to today. In such a scenario, each additional infected person would contribute an additional probability of new cases and increase the value of $I_t$; therefore to estimate $R_t$, $I_t$ must be scaled down by the additional probability each previously infected person contributes - hence the denominator in \cref{eq:original-rt}. To understand the mathematical derivation of this equation, we refer readers to the article by Wallinga and Lipsitch [-@wallinga_how_2007].
 
 If we make the simplifying assumption that there is minimal variance in $g(a)$ (i.e. $g(a)$ is 1 when $a$ equals the mean generation interval ($d$) and $g(a)$ is zero for all other values of $a$), then Equation \cref{eq:original-rt} can be simplified to:
 
@@ -193,20 +193,25 @@ All simulations, data processing, analysis, and graphics were all created using 
 ```{r}
 # Descriptive Statistics
 N = simulation_parameters$initial_state_values %>% sum()
-error_median = with(rt_estimates, median(abs(rt.simple_mean_error), na.rm = T)) %>% signif(digits = 2)
-error_quantile_975 = with(rt_estimates, quantile(abs(rt.simple_mean_error), 0.975, na.rm = T)) %>% signif(digits = 2) %>% format(scientific = F)
-error_quantile_025 = with(rt_estimates, quantile(abs(rt.simple_mean_error), 0.025, na.rm = T)) %>% signif(digits = 2) %>% format(scientific = F)
+error_summary = rt_estimates %>% filter(time > 49) %>% 
+  select(matches("rt.+_mean_error")) %>% 
+  rename_with(~ gsub("rt\\.(.+)_mean_error", "\\1", .x)) %>%
+  transmute_all(abs) %>% 
+  summarise_all(quantile, probs = c(0.025, 0.5, 0.975), na.rm = T) %>% 
+  transmute_all(signif, digits = 2)
 ```
 
-We assessed how accurately the simple ratio can estimate $R_t$ compared to a previously developed method by Cori et al [-@cori_new_2013], which is a popular method in the field - we will refer to this method as the "Cori method". $R_t$ calculation with either the simple ratio and Cori method requires knowing the mean generation interval of the infection; however, the Cori method also requires knowing the standard deviation of the generation interval or having an empiric distribution of the generation interval.
+We assessed how accurately the simple ratio can estimate $R_t$ compared to a standard method developed by Cori et al [-@cori_new_2013] - which we will refer to as the "Cori method". $R_t$ calculation with either the simple ratio and Cori method requires knowing the mean generation interval of the infection; however, the Cori method also requires knowing the standard deviation of the generation interval or having an empiric distribution of the generation interval.
 
-To assess accuracy of $R_t$ estimations, we used Susceptible-Exposed-Infectious-Resolved (SEIR) model to simulate epidemics and then compare how accurately the two methods can estimate the $R_t$ values in the epidemics. We simulated `r simulation_parameters$Nsims` epidemics in a population of `r addUnits(N)` individuals. We varied the lengths of latent and infectiousness periods with each simulation. In each simulation, the population underwent changes in the $R_t$ value representing changes in population behavior (e.g. "lockdown" period or lifting of a lockdown). \cref{fig:sim-results}**A** shows the true $R_t$ and the estimated $R_t$ values for each day in one such simulated epidemic. A full visualization of the all the simulations can be seen in (\cref{fig:all-simulations}).
+To assess accuracy of $R_t$ estimations, we used Susceptible-Exposed-Infectious-Resolved (SEIR) model to simulate epidemics and then compare how accurately the two methods can estimate the $R_t$ values in the epidemics. We simulated `r simulation_parameters$Nsims` epidemics in a population of `r addUnits(N)` individuals. We varied the lengths of latent and infectiousness periods with each simulation. In each simulation, the population underwent changes in the $R_t$ value representing changes in population behavior (e.g. "lockdown" period or lifting of a lockdown). \cref{fig:sim-results}**A** shows the true $R_t$ and the estimated $R_t$ values for each day in one such simulated epidemic. A full visualization of all the simulations can be seen in (\cref{fig:all-simulations}).
 
-Over the `r simulation_parameters$Nsims` simulation, the median estimation error of the daily $R_t$ by the simple ratio method was `r error_median` (95% range of `r error_quantile_025` to `r error_quantile_975`) (\cref{fig:sim-results}**B**). The simple ratio has a tendency to over-estimate the $R_t$, especially as the true value of $R_t$ increases above 1.5 (\cref{fig:sim-results}**C**). This is consistent with previous mathematical analysis of this simplified method of estimating $R_t$ [@wallinga_how_2007]. When $R_t$ is relatively stable, the simple method may over-estimate $R_t$; however during periods of rapid change in $R_t$ (e.g. going in and out of lockdown), the simple method may either over- or under-estimate $R_t$ (\cref{fig:sim-results}**D**).
+Over the `r simulation_parameters$Nsims` simulation, the median estimation error of the daily $R_t$ by the simple ratio method was `r error_summary$simple['50%']` (95% inter-percentile range of `r error_summary$simple['2.5%']` to `r error_summary$simple['97.5%']`) (\cref{fig:sim-results}**B**). By comparison, the median estimation error of the Cori method was `r error_summary$cori['50%']` (95% inter-percentile range of `r error_summary$cori['2.5%']` to `r error_summary$cori['97.5%']`).
 
-(ref:sim-results-cap): \textbf{The Simple Ratio approximates the effective reproduction in simualted epidemics.} One hundred epidemics were simulated using an SEIR model and the simple ratio and Cori method were used to estimate the known \$R_t\$ over time for each simulated epidemic. \textbf{(A)} The true \$R_t\$ (black line) and estimated \$R_t\$ (colored lines) over time for one of simulated epidemics. \textbf{(B)} The distribution of the absolute errors of both estimation methods across all simulated epidemics. \textbf{(C)} The estimation error of the simple ratio method is associated with size of true \$R_t\$. \textbf{(D)} The estimation error of both methods over time for the simulated epidemics. Each line represents the error in \$R_t\$ estimation for a given simulation. Note that for both methods, a substantial proportion of error occurs around days 60 and 130 when there was is rapid change in \$R_t\$
+We identified two factors contributing to error by the simple ratio. First, the simple ratio has a tendency to over-estimate the $R_t$, especially as the true value of $R_t$ increases above 1.5 (\cref{fig:sim-results}**C**). This is consistent with previous mathematical analysis of this simplified method of estimating $R_t$ [@wallinga_how_2007]. Second, the simple method (like the Cori method) is more prone to error when there is a rapid change in $R_t$ - i.e. going in and out of lockdown (\cref{fig:sim-results}**D**). When $R_t$ is relatively stable, the simple method may over-estimate $R_t$; however during periods of rapid change in $R_t$ (e.g. going in and out of lockdown), the simple method may either over- or under-estimate $R_t$. Overall, while the Cori method performs better, the simple method provides an estimation within a reasonable margin of error.
 
-```{r sim-results, fig.cap = '(ref: sim-results-cap)'}
+(ref:sim-results-cap) \textbf{The Simple Ratio approximates the effective reproduction in simualted epidemics.} One hundred epidemics were simulated using an SEIR model and the simple ratio and Cori method were used to estimate the known $R_t$ over time for each simulated epidemic. \textbf{(A)} The true $R_t$ (black line) and estimated $R_t$ (colored lines) over time for one of simulated epidemics. \textbf{(B)} The distribution of the absolute errors of both estimation methods across all simulated epidemics. The median absolute error for the Cori and simple method were `r error_summary$cori['50%']` (95% IPR `r error_summary$cori['2.5%']` to `r error_summary$cori['97.5%']`) and `r error_summary$simple['50%']` (95% IPR `r error_summary$simple['2.5%']` to `r error_summary$simple['97.5%']`), respectively. Note only error after the 50th day was considered because error early in the pandemic was inordinately large for both methods, as shown in Panel D. \textbf{(C)} The estimation error of the simple ratio method is associated with size of true $R_t$. \textbf{(D)} The estimation error of both methods over time for the simulated epidemics. Each line represents the error in $R_t$ estimation for a given simulation. Note that for both methods, a substantial proportion of error occurs around days 60 and 130 when there was is rapid change in $R_t$. IPR = "inter-percentile range".
+
+```{r sim-results, fig.cap = '(ref:sim-results-cap)'}
 
 # Plots
 panel_A <- rt_estimates %>%
@@ -214,11 +219,11 @@ panel_A <- rt_estimates %>%
   create_estimate_plot()
 
 panel_B <- rt_estimates %>%
-  filter(time > 14) %>%
+  filter(time > 49) %>%
   create_rt_estimation_error_boxplot()
 
 panel_C <- rt_estimates %>%
-  filter(time > 14) %>%
+  filter(time > 49) %>%
   create_rt_estimation_error_by_rt()
 
 panel_D <- rt_estimates %>% 
@@ -241,9 +246,11 @@ ggarrange(full_figure_top, full_figure_bottom, nrow = 2, common.legend = T)
 
 ```
 
-Often however, the the mean and standard deviation of the generation interval is typically not known exactly. For instance, for the COVID-19 the mean generation interval estimates, with 95% credible intervals, include 3.95 (3.01 - 4.91) and 5.20 (3.78 - 6.78); and estimates of the standard deviation of the generation interval include 1.51 (0.74 - 2.97) and 1.72 (0.91 - 3.93) [@ganyani_estimating_2020]. Therefore, we compared the accuracy of the two methods if the standard deviation of the generation interval is mis-specified as three days longer. Under these conditions, the simple ratio actually performs slightly better than than the Cori method (\cref{fig:estimation-inaccParams}).
+Often the the mean and standard deviation of the generation interval is not known exactly. For instance, for the COVID-19 the mean generation interval estimates, with 95% credible intervals, include 3.95 (3.01 - 4.91) and 5.20 (3.78 - 6.78); and estimates of the standard deviation of the generation interval include 1.51 (0.74 - 2.97) and 1.72 (0.91 - 3.93) [@ganyani_estimating_2020]. Therefore, we compared the accuracy of the two methods if the standard deviation of the generation interval is mis-specified as three days longer. Under these conditions, the simple ratio actually performs almost identically to the Cori method (\cref{fig:estimation-inaccParams}).
 
-```{r real-world-data, fig.cap = "\\textbf{The Simple Ratio and Cori Method estimate similar Rt values for the COVID-19 pandemic}. \\textbf{(A)} Rt esimations for four sample nations \\textbf{(B)} Histogram displaying the absolute difference in Rt esimation across for each day of the pandemic (Apr 01 to Dec 12) for all 233 individual nations."}
+(ref:real-world-data-cap) \textbf{The Simple Ratio and Cori Method estimate similar Rt values for the COVID-19 pandemic}. \textbf{(A)} Rt estimations for four sample nations \textbf{(B)} Violin plot displaying the absolute difference in Rt estimation across for each day of the pandemic (Apr 01 to Dec 12) for all 233 individual nations. Median absolute difference in estimations was `r estimation_diff_median` (95% IPR `r estimation_diff_quantile_025` to `r estimation_diff_quantile_975`). IPR = "inter-percentile range".
+
+```{r real-world-data, fig.cap = "(ref:real-world-data-cap)"}
 
 countries = c("United States", "Canada", "United Kingdom", "Germany")
 
@@ -257,7 +264,7 @@ panel_A <- national_data %>%
     geom_line(aes(time, mean, group = Method, color = Method), size = 1) +
     geom_ribbon(aes(time, ymin = quantile_025, ymax = quantile_975, group = Method, fill = Method), alpha = 0.2) + 
     geom_hline(yintercept = 1, linetype = 2) + 
-    facet_wrap(~country) + 
+    facet_wrap(~country, scales = "free") + 
     ylab("Rt") + 
     custom_theme() + 
     theme(strip.background = element_blank(),
@@ -265,12 +272,14 @@ panel_A <- national_data %>%
     scale_color_manual(values=cbPalette)
 
 panel_B <- national_data_filtered %>%
-  ggplot() + 
-    geom_histogram(aes(estimation_diff)) + scale_x_log10(labels = scales::label_number(accuracy = 0.0001)) + 
-    labs(x = "absolute difference in Rt estimation") +
+  ggplot(aes("simple vs cori", estimation_diff)) + 
+    geom_violin() +
+    geom_boxplot(width = 0.1, outlier.alpha = 0) +
+    scale_y_log10(labels = scales::label_number(accuracy = 0.0001)) + 
+    labs(y = "absolute difference in Rt estimation", x = "") +
     custom_theme()
 
-ggarrange(panel_A, ggarrange(panel_B, ncol=2), nrow = 2, heights = c(2,1), labels = c("A","B"))
+ggarrange(panel_A, panel_B, ncol = 2, widths = c(2,1), labels = c("A","B"), common.legend = T)
 ```
 
 ## Using the Simple Ratio to Estimate $R_t$ with real-world COVID-19 data {.unnumbered}
@@ -284,6 +293,8 @@ We next compared $R_t$ estimates from the Simple Ratio and Cori et al for using 
 ::: {#refs}
 :::
 
+\newpage
+
 # Supplementary Material {.unnumbered}
 
 \beginsupplement
@@ -292,6 +303,27 @@ We next compared $R_t$ estimates from the Simple Ratio and Cori et al for using 
 \newpage
 \blandscape
 ```
+```{r load-supp-data}
+rt_estimates_meanerr <- readd("rt_estimates_meanerr")
+rt_estimates_sderr <- readd("rt_estimates_sderr")
+
+supp_error_summary.meanerr = rt_estimates_meanerr %>% filter(time > 49) %>% 
+  select(matches("rt.+_mean_error")) %>% 
+  rename_with(~ gsub("rt\\.(.+)_mean_error", "\\1", .x)) %>%
+  transmute_all(abs) %>% 
+  summarise_all(quantile, probs = c(0.025, 0.5, 0.975), na.rm = T) %>% 
+  transmute_all(signif, digits = 2) %>%
+  transmute_all(format, scentific = F)
+
+supp_error_summary.sderr = rt_estimates_sderr %>% filter(time > 49) %>% 
+  select(matches("rt.+_mean_error")) %>% 
+  rename_with(~ gsub("rt\\.(.+)_mean_error", "\\1", .x)) %>%
+  transmute_all(abs) %>% 
+  summarise_all(quantile, probs = c(0.025, 0.5, 0.975), na.rm = T) %>% 
+  transmute_all(signif, digits = 2) %>%
+  transmute_all(format, scentific = F)
+```
+
 ```{r all-simulations, fig.width = 11, fig.height = 6, fig.cap = "All Simulations"}
 
 rt_estimates %>%
@@ -304,15 +336,15 @@ rt_estimates %>%
 
 \newpage
 
-```{r estimation-inaccParams,  fig.cap = "\\textbf{$R_t$ estimation error when the mean or standard deviation of the generation interval is mis-specified}. Similar to \\textbf{Figure 1}, this figure demonstrate the distribution of absolute error when estimating $R_t$ for 100 simulated epidemics.  \\textbf{(A)} Distribution of errors when the mean of the generation interval is mis-specified as 2 days too long. The average \\textbf{(B)} Distribution of errors when the standard deviation is mis-specified as 3 days too long."}
+(ref:estimation-inaccParams-cap) \textbf{$R_t$ estimation error when the mean or standard deviation of the generation interval is mis-specified}. Similar to \textbf{Figure 1}, this figure demonstrate the distribution of absolute error when estimating $R_t$ for 100 simulated epidemics. \textbf{(A)} Distribution of errors when the mean of the generation interval is mis-specified as 2 days too long.The median absolute error for the Cori and simple method were `r supp_error_summary.meanerr$cori['50%']` (95% IPR `r supp_error_summary.meanerr$cori['2.5%']` to `r supp_error_summary.meanerr$cori['97.5%']`) and `r supp_error_summary.meanerr$simple['50%']` (95% IPR `r supp_error_summary.meanerr$simple['2.5%']` to `r supp_error_summary.meanerr$simple['97.5%']`), respectively. The average \textbf{(B)} Distribution of errors when the standard deviation is mis-specified as 3 days too long. The median absolute error for the Cori and simple method were `r supp_error_summary.sderr$cori['50%']` (95% IPR `r supp_error_summary.sderr$cori['2.5%']` to `r supp_error_summary.sderr$cori['97.5%']`) and `r supp_error_summary.sderr$simple['50%']` (95% IPR `r supp_error_summary.sderr$simple['2.5%']` to `r supp_error_summary.sderr$simple['97.5%']`), respectively.
 
-rt_estimates_meanerr <- readd("rt_estimates_meanerr")
-rt_estimates_sderr <- readd("rt_estimates_sderr")
-
+```{r estimation-inaccParams,  fig.cap = "(ref:estimation-inaccParams-cap)"}
 panel_A <- rt_estimates_meanerr %>% 
+  filter(time > 49) %>%
   create_rt_estimation_error_boxplot()
 
 panel_B <- rt_estimates_sderr %>% 
+  filter(time > 49) %>%
   create_rt_estimation_error_boxplot()
             
 ggarrange(panel_A, panel_B, ncol=2, align = "hv", labels=c("A", "B"), common.legend = T)
